@@ -1,0 +1,21 @@
+{
+  "name": "LIFER - Productivity Superapp",
+  "short_name": "LIFER",
+  "description": "Todo, Calendar, and Finance in one place.",
+  "start_url": "/dashboard/todo",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
