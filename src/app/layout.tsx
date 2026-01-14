@@ -5,7 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
     title: "LIFER - Productivity Superapp",
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={inter.className}>
+            <body className={`${inter.variable} antialiased font-sans`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
