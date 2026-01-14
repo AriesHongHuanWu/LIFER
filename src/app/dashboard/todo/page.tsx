@@ -13,15 +13,30 @@ export default function TodoPage() {
     const [newTask, setNewTask] = useState("");
     const [isAdding, setIsAdding] = useState(false);
 
-    // Basic sorting/grouping could happen here.
-    // For now, simple list.
+    // Task Input State
+    const [date, setDate] = useState<Date | undefined>();
+    const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTask.trim()) return;
-        addTodo(newTask);
+
+        // Pass explicit state (from buttons) OR let parser handle it if defaults?
+        // Actually, our hook logic prefers parsed if passed defaults.
+        // Let's passed the explicit state.
+        addTodo(newTask, date || null, priority);
+
         setNewTask("");
+        setDate(undefined);
+        setPriority("medium");
+        // Keep isAdding true for rapid entry? Or close? User preference. Close for now.
         setIsAdding(false);
+    };
+
+    // Cycle priority
+    const togglePriority = () => {
+        const map = { low: "medium", medium: "high", high: "low" } as const;
+        setPriority(map[priority]);
     };
 
     if (loading) {
@@ -39,6 +54,18 @@ export default function TodoPage() {
                 </div>
             </div>
         )
+    }
+
+    const priorityColor = {
+        high: "text-red-500 border-red-500 bg-red-50 dark:bg-red-900/10",
+        medium: "text-orange-500 border-orange-500 bg-orange-50 dark:bg-orange-900/10",
+        low: "text-blue-500 border-blue-500 bg-blue-50 dark:bg-blue-900/10",
+    };
+
+    const priorityBoader = {
+        high: "border-red-500",
+        medium: "border-orange-500",
+        low: "border-blue-500",
     }
 
     return (
@@ -63,28 +90,43 @@ export default function TodoPage() {
                         <span className="font-medium">Add task</span>
                     </button>
                 ) : (
-                    <form onSubmit={handleSubmit} className="border rounded-xl p-4 bg-card shadow-sm space-y-3">
+                    <form onSubmit={handleSubmit} className="border rounded-xl p-4 bg-card shadow-sm space-y-3 animate-in fade-in slide-in-from-top-2">
                         <input
                             autoFocus
                             type="text"
-                            placeholder="Task name"
+                            placeholder="Task name (e.g., 'Buy milk P1 tomorrow')"
                             value={newTask}
                             onChange={(e) => setNewTask(e.target.value)}
                             className="w-full bg-transparent text-lg font-medium focus:outline-none placeholder:text-muted-foreground/50"
                         />
                         <div className="flex justify-between items-center pt-2">
-                            <div className="flex gap-2">
-                                <button type="button" className="p-1.5 hover:bg-secondary rounded-lg text-muted-foreground">
-                                    <CalendarIcon className="h-4 w-4" />
-                                </button>
-                                <button type="button" className="p-1.5 hover:bg-secondary rounded-lg text-muted-foreground">
+                            <div className="flex gap-2 items-center">
+                                {/* Date Picker Trigger (Simple native date input for now) */}
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        onChange={(e) => setDate(e.target.valueAsDate || undefined)}
+                                    />
+                                    <button type="button" className={cn("p-1.5 hover:bg-secondary rounded-lg text-muted-foreground flex items-center gap-1", date && "text-primary font-medium")}>
+                                        <CalendarIcon className="h-4 w-4" />
+                                        {date && <span className="text-xs">{format(date, "MMM d")}</span>}
+                                    </button>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={togglePriority}
+                                    className={cn("p-1.5 hover:bg-secondary rounded-lg flex items-center gap-1", priorityColor[priority])}
+                                >
                                     <Flag className="h-4 w-4" />
+                                    <span className="text-xs uppercase">{priority}</span>
                                 </button>
                             </div>
                             <div className="flex gap-2">
                                 <button
                                     type="button"
-                                    onClick={() => setIsAdding(false)}
+                                    onClick={() => { setIsAdding(false); setNewTask(""); setDate(undefined); setPriority("medium"); }}
                                     className="px-3 py-1.5 text-sm font-medium hover:bg-secondary rounded-lg"
                                 >
                                     Cancel
@@ -116,8 +158,8 @@ export default function TodoPage() {
                                     className={cn(
                                         "mt-1 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors",
                                         todo.completed
-                                            ? "bg-primary border-primary text-primary-foreground"
-                                            : "border-muted-foreground/30 hover:border-primary"
+                                            ? "bg-muted border-muted text-muted-foreground" // Completed style
+                                            : cn("hover:opacity-80", priorityColor[todo.priority || "medium"].split(" ")[0], priorityBoader[todo.priority || "medium"]) // Active style
                                     )}
                                 >
                                     {todo.completed && <CheckSquare className="h-3 w-3" />}
@@ -130,12 +172,20 @@ export default function TodoPage() {
                                     )}>
                                         {todo.title}
                                     </p>
-                                    {todo.dueDate && (
-                                        <div className="flex items-center gap-1 mt-1 text-xs text-red-500">
-                                            <CalendarIcon className="h-3 w-3" />
-                                            {format(todo.dueDate, "MMM d")}
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-2 mt-1">
+                                        {todo.dueDate && (
+                                            <div className={cn("flex items-center gap-1 text-xs", todo.dueDate < new Date() ? "text-red-500" : "text-muted-foreground")}>
+                                                <CalendarIcon className="h-3 w-3" />
+                                                {format(todo.dueDate, "MMM d")}
+                                            </div>
+                                        )}
+                                        {/* Priority Indicator in List */}
+                                        {todo.priority && todo.priority !== 'medium' && (
+                                            <div className={cn("text-[10px] uppercase font-bold px-1 rounded border", priorityColor[todo.priority])}>
+                                                {todo.priority}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
