@@ -43,7 +43,7 @@ export default function Home() {
                         Get Started <ArrowRight className="h-5 w-5" />
                     </Link>
                     <Link
-                        href="/dashboard/demo"
+                        href="/dashboard/todo"
                         className="px-8 py-4 bg-secondary text-secondary-foreground rounded-2xl font-semibold text-lg hover:bg-secondary/80 transition-opacity"
                     >
                         Live Demo
