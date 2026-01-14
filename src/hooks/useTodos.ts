@@ -16,6 +16,7 @@ import {
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { Todo } from "@/types";
+import { parseTaskInput } from "@/lib/parser";
 
 export function useTodos() {
     const { user } = useAuth();
@@ -52,11 +53,27 @@ export function useTodos() {
 
     const addTodo = async (title: string, dueDate: Date | null = null, priority: Todo["priority"] = "medium") => {
         if (!user) return;
+
+        // Use smart parsing if no explicit dates/priority overrides are passed (or if they match defaults)
+        const parsed = parseTaskInput(title);
+
+        // If the parsed title is different, use it.
+        // If explicit dueDate is null, use parsed.
+        // If explicit priority is medium (default), use parsed.
+        // This allows programmatic override if needed, but defaults to smart parsing.
+
+        const finalTitle = parsed.title;
+        const finalDueDate = dueDate || parsed.dueDate || null;
+
+        // Only override priority if it was default 'medium' AND we found something else
+        // Or should we always prefer parsed? Let's prefer parsed if it's there.
+        const finalPriority = (priority === 'medium' && parsed.priority) ? parsed.priority : priority;
+
         await addDoc(collection(db, "users", user.uid, "tasks"), {
-            title,
+            title: finalTitle,
             completed: false,
-            dueDate,
-            priority,
+            dueDate: finalDueDate,
+            priority: finalPriority,
             projectId: "inbox",
             createdAt: serverTimestamp(),
         });

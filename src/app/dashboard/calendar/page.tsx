@@ -16,10 +16,26 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CalendarPage() {
-    const { todos } = useTodos();
+    const { todos, loading } = useTodos();
     const [currentDate, setCurrentDate] = useState(new Date());
+
+    if (loading) {
+        return (
+            <div className="h-full flex flex-col p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-8 w-48" />
+                    <div className="flex gap-2">
+                        <Skeleton className="h-9 w-9" />
+                        <Skeleton className="h-9 w-9" />
+                    </div>
+                </div>
+                <Skeleton className="flex-1 w-full rounded-xl" />
+            </div>
+        );
+    }
 
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);

@@ -5,6 +5,7 @@ import { useFinance } from "@/hooks/useFinance";
 import { cn } from "@/lib/utils";
 import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FinancePage() {
     const { expenses, loading, addExpense, deleteExpense } = useFinance();
@@ -38,7 +39,18 @@ export default function FinancePage() {
         setIsAdding(false);
     };
 
-    if (loading) return <div className="p-8">Loading finance data...</div>;
+    if (loading) {
+        return (
+            <div className="max-w-5xl mx-auto space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Skeleton className="h-32 rounded-2xl" />
+                    <Skeleton className="h-32 rounded-2xl" />
+                    <Skeleton className="h-32 rounded-2xl" />
+                </div>
+                <Skeleton className="h-64 rounded-2xl" />
+            </div>
+        )
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-8">
